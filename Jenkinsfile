@@ -4,6 +4,7 @@ pipeline {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
     } 
     environment {
+                GITHUB_TOKEN = credentials('GAT')
                 AWS_ACCESS_KEY_ID     = credentials('aws-cred')
                 AWS_SECRET_ACCESS_KEY = credentials('aws-cred')
     }
@@ -15,7 +16,7 @@ pipeline {
                  script{
                         dir("terraform")
                         {
-                            git "https://github.com/urstrulyManoj1/terraform-practise.git"
+                           git credentialsId: 'GITHUB_TOKEN',branch: 'main' ,url : "https://github.com/urstrulyManoj1/terraform-practise"
                         }
                     }
                 }
