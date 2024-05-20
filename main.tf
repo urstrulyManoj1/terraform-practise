@@ -34,7 +34,7 @@ resource "aws_db_instance" "main" {
 
 resource "aws_db_subnet_group" "custom" {
   name       = "custom-db-subnet-group"
-  subnet_ids = ["subnet-075652031249df1f9","subnet-082e9a7232cbcce9b", "subnet-0dd7d7963c8233253"]  # Replace with your actual subnet IDs
+  subnet_ids = ["subnet-075652031249df1f9","subnet-082e9a7232cbcce9b","subnet-0dd7d7963c8233253"]  # Replace with your actual subnet IDs
 
   tags = {
     Name = "CustomDBSubnetGroup"
