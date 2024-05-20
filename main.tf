@@ -14,7 +14,7 @@ resource "aws_db_instance" "main" {
   skip_final_snapshot  = true
 
   # Set this to your actual VPC security group IDs
-  vpc_security_group_ids = ["sg-09fe7f3c0f9aacc32"]
+  vpc_security_group_ids = ["sg-01c676b68a3a80b20","sg-00763455b312ff101"]
 
   # Set this to your actual DB subnet group name
   db_subnet_group_name = aws_db_subnet_group.custom.name
@@ -34,7 +34,7 @@ resource "aws_db_instance" "main" {
 
 resource "aws_db_subnet_group" "custom" {
   name       = "custom-db-subnet-group"
-  subnet_ids = ["subnet-0db8bdb270e49e633", "subnet-0e3a470a8a2508d16"]  # Replace with your actual subnet IDs
+  subnet_ids = ["subnet-075652031249df1f9","subnet-082e9a7232cbcce9b", "subnet-0dd7d7963c8233253"]  # Replace with your actual subnet IDs
 
   tags = {
     Name = "CustomDBSubnetGroup"
