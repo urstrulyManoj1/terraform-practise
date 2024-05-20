@@ -8,7 +8,6 @@ resource "aws_db_instance" "main" {
   engine               = "mysql"
   engine_version       = "8.0"
   instance_class       = "db.t3.micro"
-  name                 = "smdb"
   username             = "admin"
   password             = "Admin@123"  # Use a strong password
   parameter_group_name = "default.mysql8.0"
