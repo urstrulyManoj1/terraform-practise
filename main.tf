@@ -17,7 +17,7 @@ resource "aws_db_instance" "main" {
   vpc_security_group_ids = ["sg-09fe7f3c0f9aacc32"]
 
   # Set this to your actual DB subnet group name
-  db_subnet_group_name = "default"
+  db_subnet_group_name = aws_db_subnet_group.custom.name
 
   # Backup settings
   backup_retention_period = 7
@@ -32,3 +32,11 @@ resource "aws_db_instance" "main" {
   }
 }
 
+resource "aws_db_subnet_group" "custom" {
+  name       = "custom-db-subnet-group"
+  subnet_ids = ["subnet-0db8bdb270e49e633", "subnet-0e3a470a8a2508d16"]  # Replace with your actual subnet IDs
+
+  tags = {
+    Name = "CustomDBSubnetGroup"
+  }
+}
