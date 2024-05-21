@@ -1,42 +1,129 @@
-provider "aws" {
-  region     = "us-west-1"
-}
-
-resource "aws_db_instance" "main" {
-  allocated_storage    = 20
-  storage_type         = "gp2"
-  engine               = "mysql"
-  engine_version       = "8.0"
-  instance_class       = "db.t3.micro"
-  username             = "admin"
-  password             = "Admin123"  # Use a strong password
-  parameter_group_name = "default.mysql8.0"
-  skip_final_snapshot  = true
-
-  # Set this to your actual VPC security group IDs
-  vpc_security_group_ids = ["sg-01c676b68a3a80b20","sg-00763455b312ff101"]
-
-  # Set this to your actual DB subnet group name
-  db_subnet_group_name = aws_db_subnet_group.custom.name
-
-  # Backup settings
-  backup_retention_period = 7
-  backup_window           = "03:00-06:00"
-
-  # Maintenance settings
-  maintenance_window = "Mon:00:00-Mon:03:00"
-
-  # Tags
+resource "aws_vpc" "vpc" {
+  cidr_block = "12.0.0.0/16"
   tags = {
-    Name = "MyRDSInstance"
+    Name = "test-vpc"
   }
 }
 
-resource "aws_db_subnet_group" "custom" {
-  name       = "custom-db-subnet-group"
-  subnet_ids = ["subnet-075652031249df1f9","subnet-082e9a7232cbcce9b","subnet-0dd7d7963c8233253"]  # Replace with your actual subnet IDs
-
+resource "aws_subnet" "public" {
+  vpc_id            = aws_vpc.vpc.id
+  cidr_block        = "12.0.1.0/24"
+  availability_zone = "us-west-2a"
   tags = {
-    Name = "CustomDBSubnetGroup"
+    Name = "subnet_pub"
   }
 }
+
+resource "aws_subnet" "private" {
+  vpc_id            = aws_vpc.vpc.id
+  cidr_block        = "12.0.2.0/24" # Choose a valid CIDR block within the VPC range
+  availability_zone = "us-west-2b"
+  tags = {
+    Name = "subnet_pvt"
+  }
+}
+
+
+resource "aws_db_subnet_group" "db_subnet" {
+  name       = "db_subnet"
+  subnet_ids = [aws_subnet.private.id, aws_subnet.public.id]
+  tags = {
+    Name = "db_subnet"
+  }
+}
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.vpc.id
+  tags = {
+    Name = "igw"
+  }
+}
+
+resource "aws_route_table" "route" {
+  vpc_id = aws_vpc.vpc.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+  tags = {
+    Name = "route_table"
+  }
+}
+
+resource "aws_route_table_association" "route_ass" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.route.id
+}
+
+// ec2
+resource "aws_instance" "ec2" {
+  ami           = "ami-0cf2b4e024cdb6960"
+  key_name      = "rsa"
+  instance_type = "t2.micro"
+  tags = {
+    Name = "ec2-001"
+  }
+  subnet_id                   = aws_subnet.public.id
+  vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
+  associate_public_ip_address = true
+}
+
+//ec2 sg
+resource "aws_security_group" "ec2_sg" {
+  tags = {
+    Name = "ec2_sg"
+  }
+  vpc_id = aws_vpc.vpc.id
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+  }
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+  }
+  egress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+  }
+}
+
+//rds
+resource "aws_db_instance" "rds" {
+  db_subnet_group_name   = "db_subnet"
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  # Security group for RDS instance
+  engine         = "mysql"
+  engine_version = "5.7"
+  instance_class = "db.t3.micro"
+  tags = {
+    Name = "mydatabase"
+  }
+  username            = "admin"
+  password            = "password"
+  allocated_storage   = 20
+  skip_final_snapshot = true
+}
+
+//rds sg
+resource "aws_security_group" "rds_sg" {
+  tags = {
+    Name = "rds_sg"
+  }
+  vpc_id = aws_vpc.vpc.id
+  ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ec2_sg.id]
+
+  }
+
+}
+
