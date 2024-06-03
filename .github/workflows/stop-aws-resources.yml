@@ -1,0 +1,36 @@
+name: Stop AWS Resources
+
+on:
+  workflow_dispatch:
+
+jobs:
+  stop-resources:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ secrets.AWS_REGION }}
+
+      - name: Stop EC2 instances
+        run: |
+          echo "Stopping all EC2 instances..."
+          INSTANCE_IDS=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].InstanceId' --output text)
+          if [ -n "$INSTANCE_IDS" ]; then
+            aws ec2 stop-instances --instance-ids $INSTANCE_IDS
+          else
+            echo "No EC2 instances found to stop."
+          fi
+
+      - name: Stop RDS instances
+        run: |
+          echo "Stopping all RDS instances..."
+          DB_INSTANCE_IDENTIFIERS=$(aws rds describe-db-instances --query 'DBInstances[*].DBInstanceIdentifier' --output text)
+          for DB_INSTANCE_IDENTIFIER in $DB_INSTANCE_IDENTIFIERS; do
+            aws rds stop-db-instance --db-instance-identifier $DB_INSTANCE_IDENTIFIER
+          done
