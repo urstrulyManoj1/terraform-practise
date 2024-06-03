@@ -1,5 +1,5 @@
 provider "aws" {
-    region = "us-west-2"  
+    region = "us-west-1"  
 }
 
 resource "aws_vpc" "vpc" {
@@ -61,8 +61,8 @@ resource "aws_route_table_association" "route_ass" {
 
 // ec2
 resource "aws_instance" "ec2" {
-  ami           = "ami-0cf2b4e024cdb6960"
-  key_name      = "rsa"
+  ami           = "ami-036cafe742923b3d9"
+  key_name      = "vpc02-ec2-key"
   instance_type = "t2.micro"
   tags = {
     Name = "tf-jenkins-ec2"
