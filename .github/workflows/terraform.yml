@@ -2,11 +2,11 @@ name: Terraform
 
 on:
   push:
-    branches:
-      - main
+    paths:
+      - 'main.tf'
   pull_request:
-    branches:
-      - main
+    paths:
+      - 'main.tf'
 
 jobs:
   terraform:
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 1.8.4 # Specify the version of Terraform you are using
+          terraform_version: 1.0.0 # Specify the version of Terraform you are using
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
