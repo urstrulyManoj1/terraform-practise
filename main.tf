@@ -12,7 +12,7 @@ resource "aws_vpc" "vpc" {
 resource "aws_subnet" "public" {
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = "12.0.1.0/24"
-  availability_zone = "us-west-2a"
+  availability_zone = "us-west-1a"
   tags = {
     Name = "subnet_pub"
   }
@@ -21,7 +21,7 @@ resource "aws_subnet" "public" {
 resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = "12.0.2.0/24" # Choose a valid CIDR block within the VPC range
-  availability_zone = "us-west-2b"
+  availability_zone = "us-west-1b"
   tags = {
     Name = "subnet_pvt"
   }
